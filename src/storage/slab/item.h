@@ -71,6 +71,9 @@ struct item {
     uint8_t           olen;          /* optional length (right after cas) */
     uint8_t           padding;       /* keep end 64-bit aligned */
     char              end[1];        /* item data */
+
+    /**********/
+    uint32_t          freq;         /* access freq */
 };
 
 #define ITEM_MAGIC      0xfeedface

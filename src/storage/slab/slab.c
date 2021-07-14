@@ -2,6 +2,10 @@
 
 #include "hashtable.h"
 #include "item.h"
+
+/******/
+#include "MyWrapper.h"
+
 #include <datapool/datapool.h>
 #include <cc_mm.h>
 #include <cc_util.h>
@@ -645,6 +649,9 @@ _slab_hdr_init(struct slab *slab, uint8_t id)
     slab->initialized = 1;
     slab->unused = 0;
     slab->refcount = 0;
+
+    /********/
+    slab->freq = 0;
 }
 
 static bool
@@ -805,20 +812,56 @@ _slab_evict_rand(void)
  * Evict by looking into least recently used queue of all slabs.
  */
 static struct slab *
-_slab_evict_lru(int id)
+_slab_evict_lru(int id, /******/ int threshold)
 {
     struct slab *slab = _slab_lruq_head();
+    struct slab *temp = slab;
     int i = 0;
+    int j = 0;
+    int freq = INT32_MAX;
+    int EVICT_TRIES = 5;
 
-    while (slab != NULL && ++i < TRIES_MAX && !_slab_check_no_refcount(slab)) {
+    struct MyClass* c = newMyClass();
+    MyClass_int_set(c, 3);
+    printf("%s\n", "test");
+    printf("%i\n", MyClass_int_get(c));
+    
+    printf("%s\n", "eviction");
+    printf("%d\n", slab->freq);
+    // if (slab == NULL) {
+    //     printf("%s\n", "null");
+    // }
+    // if (_slab_check_no_refcount(slab)) {
+    //     printf("%s\n", "refcount");
+    // }
+    // while (slab != NULL && ++i < TRIES_MAX && (!_slab_check_no_refcount(slab) || slab->freq > threshold)) {
+    //     printf("%s\n", "slab freq");
+    //     printf("%d\n", slab->freq);
+    //     slab = TAILQ_NEXT(slab, s_tqe);
+    // };
+
+    while (slab != NULL && ++i < TRIES_MAX && (!_slab_check_no_refcount(slab) || j < EVICT_TRIES)) {
+        printf("%s\n", "slab freq");
+        printf("%d\n", slab->freq);
+        if (_slab_check_no_refcount(slab)) {
+            j++;
+            if (slab->freq < freq) {
+                freq = slab->freq;
+                temp = slab;
+            }
+        }
         slab = TAILQ_NEXT(slab, s_tqe);
     };
+
+    slab = temp;
+    printf("%d\n", slab->freq);
 
     if (slab == NULL) {
         /* warning here because eviction failure should be rare. This can
          * indicate there are dead/idle connections hanging onto items and
          * slab refcounts.
          */
+         printf("%s\n", "eviction failure");
         log_warn("can't find a slab for lru-evicting slab with %d tries", i);
     } else {
         log_verb("lru-evicting slab %p with id %u", slab, slab->id);
@@ -877,7 +920,7 @@ _slab_get(uint8_t id)
     slab = _slab_get_new();
 
     if (slab == NULL && (evict_opt & EVICT_CS)) {
-        slab = _slab_evict_lru(id);
+        slab = _slab_evict_lru(id, /******/ 300);
     }
 
     if (slab == NULL && (evict_opt & EVICT_RS)) {

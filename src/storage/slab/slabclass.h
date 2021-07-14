@@ -69,10 +69,14 @@ struct slabclass {
     size_t          size;                  /* item size (const) */
 
     uint32_t        nfree_itemq;           /* # free item q */
-    struct item_slh free_itemq;            /* free item q */
+    struct item_slh free_itemq;            /* free item q -
+                                            Items that are available for reuse (i.e. allocated
+                                            * and then freed)*/
 
     uint32_t        nfree_item;            /* # free item (in current slab) */
-    struct item     *next_item_in_slab;    /* next free item (in current slab, not freeq) */
+    struct item     *next_item_in_slab;    /* next free item (in current slab, not freeq)
+                                            next available, unallocated
+                                            * item in the current slab*/
 };
 
 /*

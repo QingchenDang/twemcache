@@ -117,6 +117,10 @@ else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 endif()
 add_definitions()
+
+set(CMAKE_CPP_COMPILER "g++-4.2")
+set(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} -std=c++11 -Wall -fprofile-arcs -ftest-coverage")
+
 set(CFLAGS_LIST
     "-std=c11 "
     "-ggdb3 "
@@ -124,7 +128,8 @@ set(CFLAGS_LIST
     "-Wstrict-prototypes -Wmissing-prototypes "
     "-Wmissing-declarations -Wredundant-decls "
     "-Wunused-function -Wunused-value -Wunused-variable "
-    "-fno-strict-aliasing ")
+    "-fno-strict-aliasing "
+    "-Wall -fprofile-arcs -ftest-coverage")
 
 if(BUILD_AND_INSTALL_CHECK)
     # (simms) What follows is a crime against build systems as we run the build/install

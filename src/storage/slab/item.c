@@ -46,6 +46,8 @@ _item_reset(struct item *it)
     it->olen = 0;
     it->expire_at = 0;
     it->create_at = 0;
+    /********/
+    it->freq = 0;
 }
 
 /*
@@ -142,6 +144,7 @@ void
 item_insert(struct item *it, const struct bstring *key)
 {
     ASSERT(it != NULL && key != NULL);
+    //printf("%s\n", "insert to hashtable");
 
     item_delete(key);
 
@@ -183,6 +186,7 @@ struct item *
 item_get(const struct bstring *key)
 {
     struct item *it;
+    struct slab *s;
 
     it = hashtable_get(key->data, key->len, hash_table);
     if (it == NULL) {
@@ -202,6 +206,9 @@ item_get(const struct bstring *key)
 
     log_verb("get it %p of id %"PRIu8, it, it->id);
 
+    it->freq += 1;
+    s = item_to_slab(it);
+    s->freq += 1;
     return it;
 }
 
@@ -427,4 +434,3 @@ item_expire(struct bstring *prefix)
 
     return nkey;
 }
-

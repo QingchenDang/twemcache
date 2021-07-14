@@ -2,7 +2,9 @@
 
 #include "item.h"
 #include "hashtable.h"
-#include "slabclass.h"
+
+/******/
+#include "MyWrapper.h"
 
 #include <cc_define.h>
 #include <cc_itt.h>
@@ -142,6 +144,8 @@ struct slab {
     uint16_t          unused;       /* unused, must be 0 */
     uint32_t          refcount;     /* # items that can't be evicted */
     uint8_t           data[1];      /* opaque data */
+    /**********/
+    uint32_t          freq;         /* access freq */
 };
 
 TAILQ_HEAD(slab_tqh, slab);
